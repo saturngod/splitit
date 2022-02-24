@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 void main() {
   runApp(const MyApp());
@@ -37,9 +38,26 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  var dropdownvalue = "0";
-  var items = ["0", "5", "7"];
-  double perPerson = 0.0;
+  TextEditingController _peopleController = TextEditingController();
+  TextEditingController _totoalController = TextEditingController();
+
+  double get actualAmount {
+    if (_totoalController.text == "") {
+      return 0.0;
+    }
+    var total = int.parse(_totoalController.text);
+    return total + (total * dropdownvalue / 100);
+  }
+
+  var dropdownvalue = 0;
+  var items = [0, 5, 7];
+  double get perPerson {
+    if (_peopleController.text == "") {
+      return 0;
+    }
+    return actualAmount / int.parse(_peopleController.text);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,13 +70,35 @@ class _MyHomePageState extends State<MyHomePage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextField(
-              decoration: InputDecoration(label: Text("Number of people")),
+              controller: _peopleController,
+              onChanged: (value) {
+                setState(() {});
+              },
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              decoration: const InputDecoration(
+                  icon: Icon(
+                    Icons.people,
+                    color: Colors.blue,
+                  ),
+                  label: Text("Number of people")),
             ),
             const SizedBox(
               height: 12,
             ),
             TextField(
-              decoration: InputDecoration(label: Text("Total Amount")),
+              controller: _totoalController,
+              onChanged: (value) {
+                setState(() {});
+              },
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              decoration: const InputDecoration(
+                  icon: Icon(
+                    Icons.attach_money,
+                    color: Colors.green,
+                  ),
+                  label: Text("Total Amount")),
             ),
             const SizedBox(
               height: 12,
@@ -67,20 +107,20 @@ class _MyHomePageState extends State<MyHomePage> {
               children: [
                 const Expanded(child: Text("Tax percentage")),
                 Expanded(
-                    child: DropdownButton(
+                    child: DropdownButton<int>(
                   isExpanded: true,
                   value: dropdownvalue,
-                  items: items.map((String items) {
+                  items: items.map((int items) {
                     return DropdownMenuItem(
                       value: items,
                       child: Center(
                           child: Text(
-                        items,
+                        items.toString(),
                         textAlign: TextAlign.center,
                       )),
                     );
                   }).toList(),
-                  onChanged: (String? newValue) {
+                  onChanged: (int? newValue) {
                     setState(() {
                       dropdownvalue = newValue!;
                     });
@@ -88,6 +128,10 @@ class _MyHomePageState extends State<MyHomePage> {
                 )),
               ],
             ),
+            const SizedBox(
+              height: 12,
+            ),
+            Text("Actual Amount is $actualAmount"),
             const SizedBox(
               height: 12,
             ),
